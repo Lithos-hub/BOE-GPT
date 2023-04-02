@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Exo } from "next/font/google";
 import { GetStaticProps } from "next";
-import { getPDF } from "@/playwright";
+import { getCurrentBoe } from "@/database";
 
 const inter = Exo({ subsets: ["latin"] });
 
@@ -18,7 +18,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={inter.className}>
-        <h1>BOE resumido</h1>
+        <h1 className="text-2xl ">BOE resumido</h1>
         <section></section>
       </main>
     </>
@@ -26,7 +26,7 @@ export default function Home() {
 }
 
 export const getStaticProps: GetStaticProps = async (ctx) => {
-  const data = await getPDF(); // your fetch function here
+  // await getCurrentBoe();
 
   return {
     props: {},
