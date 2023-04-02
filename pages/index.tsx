@@ -2,24 +2,60 @@ import Head from "next/head";
 import { Exo } from "next/font/google";
 import { GetStaticProps } from "next";
 import { getCurrentBoe } from "@/database";
+import { Navbar } from "@/components";
+import MainLayout from "@/components/Layout/MainLayout";
 
 const inter = Exo({ subsets: ["latin"] });
 
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>BOE resumido</title>
-        <meta
-          name="description"
-          content="Aplicación ver un resumen diario del Boletín Oficial del Estado (BOE) mediante uso de inteligencia artificial"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Navbar />
       <main className={inter.className}>
-        <h1 className="text-2xl ">BOE resumido</h1>
-        <section></section>
+        <MainLayout
+          title="Te resumo el BOE | El BOE de hoy"
+          description="Aplicación ver un resumen diario del Boletín Oficial del Estado (BOE) mediante uso de inteligencia artificial"
+        >
+          <>
+            <h1 className="text-2xl text-center">El BOE de hoy</h1>
+            <hr className="my-5" />
+            <strong className="font-bold text-xl">Resumen: </strong>
+
+            <ul className="text-center">
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+            </ul>
+
+            <hr className="my-5" />
+
+            <h2>Puntos importantes a destacar: </h2>
+
+            <ul className="text-center">
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+              <li className="my-5">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste,
+                non?
+              </li>
+            </ul>
+          </>
+        </MainLayout>
       </main>
     </>
   );
