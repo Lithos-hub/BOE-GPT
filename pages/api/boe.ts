@@ -8,6 +8,9 @@ type Data =
     }
   | { success: boolean; data: any };
 
+const header = `Resume el siguiente texto, destacando los puntos más importantes del mismo en formato de lista. Si consideras que hay uno o más puntos que destaquen por encima del resto, envuélvelos entre asteriscos para poder convertir ese fragmento posteriormente en negrita. También expón, en formato de lista, puntos positivos y negativos que encuentres. Usa un lenguaje fácil de entender:
+`;
+
 export const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -19,7 +22,8 @@ export const handler = async (
       temperature: 0,
       stop: ["\n"],
 
-      prompt: `Resume el siguiente texto, destacando los puntos más importantes del mismo. Si consideras que hay uno o más puntos que destaquen por encima del resto, envuélvelos entre asteriscos para poder convertir ese fragmento posteriormente en negrita: 
+      prompt: `
+        ${header}
         ${text}
         `,
     });

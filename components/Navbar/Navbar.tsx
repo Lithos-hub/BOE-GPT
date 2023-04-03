@@ -1,4 +1,5 @@
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -7,19 +8,36 @@ const Navbar = () => {
     <header>
       <AppBar
         position="sticky"
-        className="rounded-xl w-[70vw] mx-auto bg-gradient-to-bl from-primary-1 to-primary-2 text-white"
+        elevation={10}
+        className="rounded-xl w-[68vw] mx-auto bg-primary-1 bg-opacity-20 backdrop-blur-md text-white"
       >
         <Toolbar className="flex justify-between">
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            BOE resumido
-          </Typography>
+          <Link href="/">
+            <Image
+              src="/logo-banner.png"
+              width="0"
+              height="0"
+              sizes="100vw"
+              alt="BOE·GPT logo"
+              className="h-[30px] w-auto"
+            />
+          </Link>
 
-          <div>
+          <div className="flex gap-1">
             <Link href="/">
-              <Button variant="text">El BOE de hoy</Button>
+              <Button variant="contained" className="text-white bg-primary-1">
+                Inicio
+              </Button>
+            </Link>
+            <Link href="/search">
+              <Button variant="contained" className="text-white bg-primary-1">
+                Buscador
+              </Button>
             </Link>
             <Link href="/about">
-              <Button variant="text">Acerca del proyecto</Button>
+              <Button variant="contained" className="text-white bg-primary-1">
+                Sobre nosotros
+              </Button>
             </Link>
           </div>
         </Toolbar>

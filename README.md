@@ -1,6 +1,6 @@
-# BOE Resumido
+# BOE·GPT
 
-Aplicación que resume el Boletín Oficial del Estado de España (BOE) diariamente empleando Inteligencia Artificial (Chat-GPT).
+Aplicación que resume el Boletín Oficial del Estado de España (BOE) empleando Inteligencia Artificial (Chat-GPT).
 
 ## Setup
 
