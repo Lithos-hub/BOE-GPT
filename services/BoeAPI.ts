@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const boeApi = axios.create({
+const BoeApi = axios.create({
   baseURL: "/api",
   headers: {
     Authorization: `Bearer ${process.env.API_KEY}`,
   },
 });
 
-export default boeApi;
+export default BoeApi;

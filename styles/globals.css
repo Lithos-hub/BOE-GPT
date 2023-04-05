@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  @apply font-roboto;
+}
+
+.gpt p {
+  @apply text-lg;
+}
+
+.gpt li {
+  @apply my-5 ml-5;
+}
+
+.text-success {
+  @apply font-bold text-green-500;
+}
+
+.text-error {
+  @apply font-bold text-red-500;
+}
+
+.section-success {
+  @apply bg-green-500/10 p-2 rounded-xl border-green-500 border my-5;
+}
+.section-error {
+  @apply bg-red-500/10 p-2 rounded-xl border-red-500 border my-5;
+}
