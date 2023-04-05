@@ -36,15 +36,16 @@ export const getStaticPaths: GetStaticPaths = (ctx) => {
 
   return {
     paths,
-    // fallback: false,
-    fallback: "blocking",
+    fallback: false,
+    // fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const date = params!.date;
   return {
     props: {
-      date: "2020-10-08",
+      date,
       responseGPT: "<p>Prueba</p>",
     },
     revalidate: 86400,

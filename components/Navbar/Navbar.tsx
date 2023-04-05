@@ -6,9 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import dayjs, { Dayjs } from "dayjs";
 import { SearchOutlined } from "@mui/icons-material";
+import { parseDate } from "@/utils";
+
+const currentDate = parseDate(new Date().getTime());
 
 const Navbar = () => {
-  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs("2022-04-17"));
+  const [dateValue, setDateValue] = useState<Dayjs | null>(dayjs(currentDate));
   const router = useRouter();
 
   return (
@@ -18,7 +21,7 @@ const Navbar = () => {
         elevation={10}
         className="w-[77vw] mx-auto left-0 top-5 rounded-xl bg-primary-1 bg-opacity-10 backdrop-blur text-white"
       >
-        <Toolbar className="flex flex-wrap md:flex-row gap-5 justify-center md:justify-between p-5">
+        <Toolbar className="flex flex-wrap md:flex-row gap-5 justify-center md:justify-between p-2 px-5">
           <Link href="/">
             <Image
               src="/logo-banner.png"
@@ -36,38 +39,23 @@ const Navbar = () => {
                 Sobre BOE·GPT
               </Button>
             </Link>
-            <div className="flex gap-2">
-              <DatePicker
-                label="Buscar BOE por fecha"
-                value={dateValue}
-                onChange={(newdateValue) => setDateValue(newdateValue)}
-                format="DD-MM-YYYY"
-              />
-              <IconButton
-                color="primary"
-                aria-label="icono de búsqqueda"
-                onClick={() => router.push(`/boe/${dateValue}`)}
-              >
-                <SearchOutlined />
-              </IconButton>
-            </div>
-            {/* <Input
-              dateValue={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.dateValue)}
-              autoFocus
-              type="text"
-              placeholder="Buscar BOE por fecha..."
-              endAdornment={
-                <InputAdornment position="start">
-                  <IconButton
-                    aria-label="icono de búsqqueda"
-                    onClick={() => router.push(`/boe/${searchTerm}`)}
-                  >
-                    <SearchOutlined />
-                  </IconButton>
-                </InputAdornment>
-              }
-            /> */}
+
+            <DatePicker
+              label="Buscar BOE por fecha"
+              value={dateValue}
+              onChange={(newdateValue) => setDateValue(newdateValue)}
+              format="DD-MM-YYYY"
+            />
+            <IconButton
+              color="primary"
+              aria-label="icono de búsqqueda"
+              size="large"
+              onClick={() => {
+                router.push(`/boe/${dayjs(dateValue).format("DD-MM-YYYY")}`);
+              }}
+            >
+              <SearchOutlined />
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>
