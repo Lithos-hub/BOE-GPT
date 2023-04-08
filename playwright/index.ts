@@ -4,59 +4,6 @@ import path from "path";
 import { parseDate } from "@/utils";
 import { BoeDictionary } from "@/interfaces";
 
-export const getCurrentBoe = async () => {
-  const BASE_URL = "https://boe.es";
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-
-  await page.goto(BASE_URL);
-
-  const element = await page.getByText("Último BOE");
-
-  await element.click();
-
-  const dropdown = await page.getByText("Secciones");
-
-  await dropdown.click();
-
-  const option = await page.locator("a", {
-    hasText: "I. Disposiciones generales",
-  });
-
-  await option.click();
-
-  const h4s = await page.locator("h4").all();
-  const h5s = await page.locator("h5").all();
-
-  const htmlLinks = await page.getByText("Otros formatos").all();
-  const pdfLinks = await page.getByTitle("PDF firmado BOE-").all();
-
-  const objectData: BoeDictionary = {};
-
-  for (let i = 0; i < h4s.length; i++) {
-    const h4Text: string = await h4s[i].innerText();
-    const htmlName = (await htmlLinks[i].getAttribute("href")) as string;
-    const pdfName = (await pdfLinks[i]
-      .getAttribute("href")
-      .then((result) => result?.split("/pdfs/").pop()?.slice(0, -4))) as string;
-
-    objectData[h4Text] = {
-      [pdfName]: `${BASE_URL}${htmlName}`,
-    };
-  }
-
-  await browser.close();
-
-  return objectData;
-
-  // return await getAllAticlesInformation(
-  //   page,
-  //   BASE_URL,
-  //   articlePagesList,
-  //   currentDate
-  // );
-};
-
 export const getBOEByDate = async (date: string) => {
   const BASE_URL = "https://boe.es/diario_boe";
 
@@ -67,12 +14,9 @@ export const getBOEByDate = async (date: string) => {
   const dateInput = await page.$("#fechaBOE");
 
   await dateInput!.click();
-  // await dateInput!.fill(date);
-  await dateInput!.fill("2023-04-04");
+  await dateInput!.fill(date);
 
-  await page.screenshot({ path: "./captura.png" });
-
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(1000);
 
   const button = await page.$("input.boton");
 
@@ -90,61 +34,60 @@ export const getBOEByDate = async (date: string) => {
 
   await option.click();
 
-  const h4s = await page.$$("h4");
+  const dictionary: BoeDictionary = {};
+
+  const H5Tags = await page.$$("h5");
 
   const htmlLinks = await page.getByText("Otros formatos").all();
   const pdfLinks = await page.getByTitle("PDF firmado BOE-").all();
 
-  const objectData: BoeDictionary = {};
-
-  let pdfName: string;
-  let subobjectData = {};
-
-  let i = 0;
-  let j = 0;
-
-  while (i < h4s.length) {
-    const h4Text = (await h4s[i].textContent()) as string;
-    const nextH4Text = (await h4s[i + 1])
-      ? await h4s[i + 1].textContent()
-      : null;
-
-    const h5s = await page
-      // .locator(
-      //   `h5:below(:text("${h4Text}"))${`h5:above(:text("${nextH4Text}"))`}`
-      // )
-      .locator(
-        `h5:below(:text("${h4Text}"))${`h5:above(:text("${nextH4Text}"))`}`
-      )
-      .all();
-
-    const htmlName = (await htmlLinks[i].getAttribute("href")) as string;
-    console.log(`Entre ${h4Text} y ${nextH4Text} tenemos ${h5s.length} h5s`);
-
-    while (j < h5s.length) {
-      pdfName = (await pdfLinks[j]
+  const subobjectArray = Promise.all(
+    H5Tags.map(async (h5, i) => {
+      const pdfName = (await pdfLinks[i]
         .getAttribute("href")
         .then((result) =>
           result?.split("/pdfs/").pop()?.slice(0, -4)
         )) as string;
 
-      subobjectData[pdfName] = {
-        subtitle: await h5s[j].textContent(),
-        href: `${BASE_URL}${htmlName}`,
+      const sectionName = await page
+        .locator(`h4:above(:text("${pdfName}"))`)
+        .first()
+        .innerText();
+
+      const fullLink = `https://boe.es${await htmlLinks[i].getAttribute(
+        "href"
+      )}`;
+
+      return {
+        date,
+        section: sectionName,
+        boe: pdfName,
+        subtitle: await h5.textContent(),
+        href: fullLink,
       };
+    })
+  );
 
-      j++;
+  const arrayPlusHtmlText = Promise.all(
+    (await subobjectArray).map(async (item) => {
+      await page.goto(item.href);
+      const sectionText = await page.$("#textoxslt");
+      return {
+        ...item,
+        htmlText: await sectionText?.innerText(),
+      };
+    })
+  );
+
+  for (const obj of await arrayPlusHtmlText) {
+    if (!dictionary[obj.section]) {
+      dictionary[obj.section] = [];
     }
-
-    objectData[h4Text] = subobjectData;
-
-    i++;
-    j = 0;
+    dictionary[obj.section].push(obj);
   }
 
-  console.log(objectData);
-
-  return objectData;
+  await browser.close();
+  return dictionary;
 
   // return await getAllAticlesInformation(page, BASE_URL, articlePagesList, date);
 };

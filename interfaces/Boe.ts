@@ -16,8 +16,11 @@ export type DBResponseError = {
 export interface BoeDictionary {
   [index: string]: {
     [index: string]: {
+      section: string;
+      boe: string;
       href: string;
+      date: string;
       subtitle: string | null;
-    };
+    }[];
   };
 }
