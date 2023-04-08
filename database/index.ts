@@ -1,4 +1,4 @@
+export * from "./boes";
 export * as db from "./db";
-
-// Mocked database
-export * as seedData from "./boes";
+export * as dbBoe from "./dbBoe";
+export * from "./index";

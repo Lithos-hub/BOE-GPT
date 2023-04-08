@@ -22,7 +22,7 @@ const ABoutPage = () => {
           alt="BOE·GPT logo"
           className="h-[100px] w-auto mx-auto my-5"
         />
-        <article className="w-1/2 mx-auto text-justify font-extralight">
+        <article className="w-full lg:w-1/2 mx-auto text-justify font-extralight">
           <p className="text-lg">
             El objetivo del proyecto es facilitar el acceso a la información
             relativa al{" "}
@@ -36,7 +36,7 @@ const ABoutPage = () => {
             <strong className="text-primary-3 font-bold">
               obtener así un resumen además de una serie de conclusiones,
               aspectos positivos y negativos de la redacción del texto o de las
-              propias medidas que se exponen en él.
+              propias medidas que se exponen en él (a juicio de la propia IA).
             </strong>
           </p>
           <br />
@@ -57,6 +57,16 @@ const ABoutPage = () => {
             todos, y consideramos que es nuestra responsabilidad como ciudadanos
             el ser plenamente conscientes de todas estas medidas, su efecto en
             nuestras vidas y en qué medida se produce ese efecto.
+          </p>
+          <br />
+          <p className="text-lg">
+            Por otro lado, la herramienta solo rastrea la información referente
+            al primer apartado{" "}
+            <strong className="text-primary-3 font-bold">
+              I. Disposiciones generales
+            </strong>
+            , quedando excluídas el resto de secciones por el momento debido a
+            la gran cantidad de información y recursos que se consumiría.
           </p>
           <br />
           <p className="text-lg">

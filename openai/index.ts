@@ -1,15 +1,18 @@
 import { AxiosError } from "axios";
 import { Configuration, OpenAIApi } from "openai";
 
+const apiKey = process.env.OPENAI_API_KEY;
+
 const configuration = new Configuration({
   organization: "org-Cf5OrSHzwtPORWc8wT4Zo5vG",
-  apiKey: "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",
+  apiKey,
 });
 
 const openai = new OpenAIApi(configuration);
 
 const createPrompt = (text: string) => {
   return `Toma este texto:
+  
   ${text}
 
   ---------------
@@ -34,16 +37,7 @@ Resume el texto que proporcionaré a continuación mediante una lista. Deberás 
 export const runCompletion = async (reqData: Record<string, string>) => {
   try {
     const { prompt_text } = reqData;
-    // const { data } = await openai.createChatCompletion({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "user",
-    //       content: createPrompt(prompt_text),
-    //     },
-    //   ],
-    // });
-    // console.log(data);
+
     const exapleResponse = {
       id: "chatcmpl-71gNjQqTFmS8SvnTij8zgmm8oh4R6",
       object: "chat.completion",

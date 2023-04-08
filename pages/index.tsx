@@ -1,40 +1,41 @@
+import { useMemo } from "react";
 import { GetStaticProps, NextPage } from "next";
 
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { formatDate, parseDate } from "@/utils";
 
 import MainLayout from "@/components/Layout/MainLayout";
-import { formatDate } from "@/utils";
-import { runCompletion } from "@/openai";
 import { SummaryHTML } from "@/components";
 
+import BoeApi from "@/services/BoeAPI";
+import {
+  BoeDictionary,
+  DBResponseError,
+  DBResponseSuccess,
+  IBoe,
+} from "@/interfaces";
+import { runCompletion } from "@/openai";
+import { getBOEByDate, getCurrentBoe } from "@/playwright";
+import { dbBoe } from "@/database";
+
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+} from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
+
 interface Props {
-  responseGPT: string;
+  responseGPT: string | null;
+  dictionaryData?: BoeDictionary;
 }
 
-const joinedData = `
-Desde el inicio de la pandemia por COVID-19, se han establecido en España medidas de control sanitario a los pasajeros internacionales en los puntos de entrada en España, que en la actualidad están limitadas a las personas que proceden de países no pertenecientes a la Unión Europea o con la consideración de países asociados Schengen. En lo que afecta a las fronteras terrestres se encuentra articulado mediante la Orden SND/425/2022, de 13 de mayo, por la que se establecen medidas de control sanitario a las personas que llegan a España a través de los puestos fronterizos terrestres de Ceuta y Melilla y en las fronteras aéreas y marítimas, mediante la Resolución de 1 de abril de 2022, de la Dirección General de Salud Pública, relativa a los controles sanitarios a realizar en los puntos de entrada de España, modificada por la Resolución de 1 de junio de 2022.
+const HomePage: NextPage<Props> = ({ responseGPT, dictionaryData }) => {
+  const titles = useMemo(
+    () => (dictionaryData ? Object.keys(dictionaryData) : []),
+    [dictionaryData]
+  );
 
-Una vez superada la fase aguda de la pandemia, se han actualizado las medidas de vigilancia y control a nivel nacional mediante la Estrategia de vigilancia y control frente a COVID-19 tras la fase aguda de la pandemia, justificado, en gran parte, por los altos niveles de inmunización alcanzados en la población española y en los países de nuestro entorno, que han llevado a una importante disminución de los casos graves y de la letalidad frente a SARS-CoV-2.
-
-En este escenario las medidas de limitación de la movilidad internacional deben aplicarse respetando los principios generales del Derecho de la Unión, no debiendo ir más allá de lo estrictamente necesario para salvaguardar la salud pública y deben levantarse cuando la situación epidemiológica, en particular en la hospitalaria, lo permita.
-
-Por esta razón, teniendo en cuenta la evolución de la pandemia a nivel global y la situación epidemiológica en España y con el fin de favorecer la normalización de la movilidad internacional, con el menor impacto posible para la salud pública, se considera conveniente dejar sin efecto las medidas de control sanitario a las personas procedentes de países no pertenecientes a la Unión Europea o con la consideración de países asociados Schengen.
-
-En su virtud, y al amparo de lo contemplado en los artículos segundo y tercero de la Ley Orgánica 3/1986, de 14 de abril, de Medidas Especiales en Materia de Salud Pública y de lo establecido en el artículo 52 de la Ley 33/2011, de 4 de octubre, General de Salud Pública y de acuerdo con la competencia exclusiva en materia de sanidad exterior prevista en el artículo 149.1.16.ª de la Constitución Española, resuelvo:
-Primero.
-
-Dejar sin efecto la Orden SND/425/2022, de 13 de mayo, por la que se establecen medidas de control sanitario a las personas que llegan a España a través de los puestos fronterizos terrestres de Ceuta y Melilla.
-Segundo.
-
-La presente orden producirá efectos desde las 00:00 horas del 21 de octubre de 2022.
-Tercero.
-
-Contra la presente orden, que pone fin a la vía administrativa, podrá interponerse, con carácter potestativo, recurso de reposición ante la persona titular del Ministerio de Sanidad, en el plazo de un mes desde el día siguiente a su publicación de acuerdo con lo previsto en el artículo 123 de la Ley 39/2015, de 1 de octubre, del Procedimiento Administrativo Común de las Administraciones Públicas, o bien recurso contencioso-administrativo en el plazo de dos meses a partir del día siguiente al de su publicación ante la Sala de lo Contencioso-Administrativo de la Audiencia Nacional, de conformidad con lo dispuesto en los artículos 11 y 46 de la Ley 29/1998, de 13 de julio, reguladora de la Jurisdicción Contencioso-administrativa, significándose que, en el caso de interponer recurso de reposición, no se podrá interponer recurso contencioso-administrativo hasta que aquél sea resuelto expresamente o se haya producido la desestimación presunta del mismo.
-
-Madrid, 18 de octubre de 2022.–La Ministra de Sanidad, Carolina Darias San Sebastián.`;
-
-const HomePage: NextPage<Props> = ({ responseGPT }) => {
   return (
     <main>
       <MainLayout
@@ -43,7 +44,33 @@ const HomePage: NextPage<Props> = ({ responseGPT }) => {
         description="Aplicación ver un resumen diario del Boletín Oficial del Estado (BOE) mediante uso de inteligencia artificial"
       >
         <div className="px-20">
-          <SummaryHTML html={responseGPT} />
+          {responseGPT ? (
+            <SummaryHTML html={responseGPT} />
+          ) : dictionaryData ? (
+            <section className="flex flex-col gap-5">
+              {titles.map((title, i) => (
+                <Accordion key={i} className={`section-${i} border`}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    {title}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="flex flex-col gap-5">
+                      {Object.keys(dictionaryData[title]).map((boe, i) => (
+                        <div key={i} className="flex gap-5 items-center">
+                          <h1>{boe}</h1>
+                          <Button variant="outlined">Ver resumen</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </section>
+          ) : (
+            <h1 className="text-red-500 font-bold text-xl">
+              No se ha publicado un BOE en la fecha de hoy
+            </h1>
+          )}
         </div>
       </MainLayout>
     </main>
@@ -52,14 +79,25 @@ const HomePage: NextPage<Props> = ({ responseGPT }) => {
 
 export default HomePage;
 
-export const getStaticProps: GetStaticProps = async (ctx) => {
-  const data: string = await runCompletion({
-    prompt_text: joinedData,
-  });
+export const getStaticProps: GetStaticProps = async () => {
+  let data: string | null = null;
+  let dictionaryData: BoeDictionary | undefined;
 
+  // Step 1: Get the BOE of the current date from MongoDB
+  const currentDate = formatDate(new Date().getTime());
+
+  const boe: IBoe | null = await dbBoe.getBoeByDate(currentDate);
+
+  if (!boe) {
+    // dictionaryData = await getCurrentBoe();
+    dictionaryData = await getBOEByDate(currentDate);
+  } else {
+    data = boe.summary;
+  }
   return {
     props: {
       responseGPT: data,
+      dictionaryData,
     },
   };
 };

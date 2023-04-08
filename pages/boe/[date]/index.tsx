@@ -43,6 +43,7 @@ export const getStaticPaths: GetStaticPaths = (ctx) => {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const date = params!.date;
+
   return {
     props: {
       date,

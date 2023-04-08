@@ -8,6 +8,11 @@ module.exports = {
     // Or if using `src` directory:
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safeList: [
+    {
+      // TODO
+    },
+  ],
   theme: {
     fontFamily: {
       roboto: ["Roboto", "sans-serif"],
@@ -15,11 +20,11 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          1: "#264653",
-          2: "#c9ada7",
-          3: "#0077b6",
-          4: "#4a4e69",
-          5: "#22223b",
+          1: "#4da0a8",
+          2: "#a7bec6",
+          3: "#42b9f4",
+          4: "#5b8772",
+          5: "#6f6fc4",
         },
       },
     },

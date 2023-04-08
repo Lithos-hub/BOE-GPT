@@ -17,7 +17,7 @@ export default function handler(
 ) {
   switch (req.method) {
     case "GET":
-      return getAllBoes(req, res);
+      return getBoes(req, res);
 
     default:
       return res
@@ -26,14 +26,14 @@ export default function handler(
   }
 }
 
-const getAllBoes = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+const getBoes = async (_: NextApiRequest, res: NextApiResponse<Data>) => {
   try {
     await db.connect();
     const boes = await Boe.find().lean();
     res.status(200).json(boes);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: JSON.stringify(error) });
+    console.log("Error GET /boe");
+    res.status(500).json({ message: "Something went wrong in the Database" });
   } finally {
     await db.disconnect();
   }
