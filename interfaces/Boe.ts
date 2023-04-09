@@ -13,14 +13,16 @@ export type DBResponseError = {
   message: string;
 };
 
+export interface SectionData {
+  section: string;
+  boe: string;
+  href: string;
+  date: string;
+  subtitle: string | null;
+}
+
 export interface BoeDictionary {
   [index: string]: {
-    [index: string]: {
-      section: string;
-      boe: string;
-      href: string;
-      date: string;
-      subtitle: string | null;
-    }[];
+    [index: string]: SectionData[];
   };
 }

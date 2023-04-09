@@ -1,8 +1,8 @@
-import { Locator, Page, chromium } from "playwright";
+import { Locator, Page, chromium, firefox } from "playwright";
 import fs from "fs";
 import path from "path";
 import { parseDate } from "@/utils";
-import { BoeDictionary } from "@/interfaces";
+import { BoeDictionary, SectionData } from "@/interfaces";
 
 export const getBOEByDate = async (date: string) => {
   const BASE_URL = "https://boe.es/diario_boe";
@@ -14,7 +14,8 @@ export const getBOEByDate = async (date: string) => {
   const dateInput = await page.$("#fechaBOE");
 
   await dateInput!.click();
-  await dateInput!.fill(date);
+  // await dateInput!.fill(date);
+  await dateInput!.fill("2023-04-04");
 
   await page.waitForTimeout(1000);
 
@@ -41,7 +42,7 @@ export const getBOEByDate = async (date: string) => {
   const htmlLinks = await page.getByText("Otros formatos").all();
   const pdfLinks = await page.getByTitle("PDF firmado BOE-").all();
 
-  const subobjectArray = Promise.all(
+  const boeData = Promise.all(
     H5Tags.map(async (h5, i) => {
       const pdfName = (await pdfLinks[i]
         .getAttribute("href")
@@ -68,70 +69,25 @@ export const getBOEByDate = async (date: string) => {
     })
   );
 
-  const arrayPlusHtmlText = Promise.all(
-    (await subobjectArray).map(async (item) => {
-      await page.goto(item.href);
-      const sectionText = await page.$("#textoxslt");
-      return {
-        ...item,
-        htmlText: await sectionText?.innerText(),
-      };
-    })
-  );
+  for (const item of await boeData) {
+    await page.goto(await item.href);
+    const sectionText = await page.$("#textoxslt");
 
-  for (const obj of await arrayPlusHtmlText) {
+    const obj = {
+      ...item,
+      htmlText: await sectionText?.innerText(),
+    };
+
     if (!dictionary[obj.section]) {
       dictionary[obj.section] = [];
     }
     dictionary[obj.section].push(obj);
   }
 
+  console.log(dictionary);
+
   await browser.close();
   return dictionary;
 
   // return await getAllAticlesInformation(page, BASE_URL, articlePagesList, date);
-};
-
-const getAllAticlesInformation = async (
-  page: Page,
-  base_url: string,
-  pagesList: Locator[],
-  date: string
-): Promise<void> => {
-  const allUrls = await Promise.all(
-    pagesList.map(async (element, i) => {
-      return await element.getAttribute("href");
-    })
-  );
-
-  for await (const url of allUrls) {
-    await page.goto(`${base_url}${url}` as string);
-
-    const sectionText = await page.$("#textoxslt");
-
-    const data = {
-      data: await sectionText?.innerText(),
-    };
-    const jsonData = JSON.stringify(data);
-
-    const currentUrl = await page.url();
-    const fileName = currentUrl.split("id=").pop()?.split("-").pop();
-
-    const dir = path.join(process.cwd(), "database", "json", `${date}`);
-
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-
-    const filePath = path.join(
-      process.cwd(),
-      "database",
-      "json",
-      `${date}`,
-      `BOE-${fileName}.json`
-    );
-
-    fs.writeFile(filePath, jsonData, (err) => {
-      if (err) throw err;
-      console.log(`[${filePath}] has been created`);
-    });
-  }
 };

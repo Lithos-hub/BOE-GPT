@@ -24,8 +24,8 @@ const MainLayout: FC<Props> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Navbar />
-      <main className="mt-[12vh]">
-        <div className="mx-[10vw] flex items-center justify-center">
+      <main className="mt-[20vh] lg:mt-[12vh]">
+        <div className="mx-0 lg:mx-[10vw] flex items-center justify-center">
           <div className="h-auto w-full rounded-xl bg-gradient-to-br from-primary-1 via-primary-1 to-cyan-500 p-[2px]">
             <div className="flex h-full w-full items-center justify-center bg-gray-800 back rounded-xl">
               <Paper className="w-full h-full p-5 bg-[#101010] rounded-xl shadow-xl before:a">

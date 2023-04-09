@@ -7,6 +7,7 @@ import Link from "next/link";
 import dayjs, { Dayjs } from "dayjs";
 import { SearchOutlined } from "@mui/icons-material";
 import { parseDate } from "@/utils";
+import InfoIcon from "@mui/icons-material/Info";
 
 const currentDate = parseDate(new Date().getTime());
 
@@ -35,9 +36,9 @@ const Navbar = () => {
 
           <div className="flex gap-5 items-center">
             <Link href="/about">
-              <Button variant="contained" className="text-white bg-primary-1">
-                Sobre BOE·GPT
-              </Button>
+              <IconButton className="text-white bg-primary-1">
+                <InfoIcon />
+              </IconButton>
             </Link>
 
             <DatePicker

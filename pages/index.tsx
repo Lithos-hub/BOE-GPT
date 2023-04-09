@@ -36,7 +36,7 @@ const HomePage: NextPage<Props> = ({ responseGPT, dictionaryData }) => {
         sectionTitle={`El BOE de hoy - ${formatDate(new Date().getTime())}`}
         description="Aplicación ver un resumen diario del Boletín Oficial del Estado (BOE) mediante uso de inteligencia artificial"
       >
-        <div className="px-20">
+        <>
           {dictionaryData ? (
             <section className="flex flex-col gap-5">
               {titles.map((title, i) => (
@@ -48,12 +48,27 @@ const HomePage: NextPage<Props> = ({ responseGPT, dictionaryData }) => {
                     <div className="flex flex-col gap-5">
                       {dictionaryData[title].map(
                         ({ boe, subtitle, date }, i) => (
-                          <div key={i} className="flex gap-5 items-center">
-                            <strong> {subtitle} </strong>
-                            <h5>{boe}</h5>
-                            <Link href={`/boe/${date}/${boe}`}>
-                              <Button variant="outlined">Ver resumen</Button>
-                            </Link>
+                          <div
+                            key={i}
+                            className="flex justify-between gap-5 items-center"
+                          >
+                            <div>
+                              <strong> {subtitle} </strong>
+                              <h5>{boe}</h5>
+                            </div>
+                            <div className="flex gap-2">
+                              <Link href={`/boe/${date}/${boe}`}>
+                                <Button variant="outlined">Resumen</Button>
+                              </Link>
+                              <a
+                                href={`https://boe.es/diario_boe/txt.php?id=${boe}`}
+                                target="_blank"
+                              >
+                                <Button variant="outlined" color="warning">
+                                  BOE original
+                                </Button>
+                              </a>
+                            </div>
                           </div>
                         )
                       )}
@@ -67,7 +82,7 @@ const HomePage: NextPage<Props> = ({ responseGPT, dictionaryData }) => {
               No se ha publicado un BOE en la fecha de hoy
             </h1>
           )}
-        </div>
+        </>
       </MainLayout>
     </main>
   );
