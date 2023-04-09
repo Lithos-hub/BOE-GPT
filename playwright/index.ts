@@ -84,8 +84,6 @@ export const getBOEByDate = async (date: string) => {
     dictionary[obj.section].push(obj);
   }
 
-  console.log(dictionary);
-
   await browser.close();
   return dictionary;
 
