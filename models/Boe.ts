@@ -6,6 +6,10 @@ const boeSchema = new Schema({
     type: String,
     required: true,
   },
+  boeId: {
+    type: String,
+    required: true,
+  },
   summary: {
     type: String,
     required: true,

@@ -1,9 +1,8 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+
 import { IBoe } from "@/interfaces";
 import { db } from "@/database";
-
-import type { NextApiRequest, NextApiResponse } from "next";
 import { Boe } from "@/models";
-import { parseDate } from "@/utils";
 
 type Data =
   | {
@@ -18,6 +17,9 @@ export default function handler(
   switch (req.method) {
     case "GET":
       return getBoes(req, res);
+
+    case "POST":
+      return postBoe(req.body, res);
 
     default:
       return res
@@ -36,5 +38,31 @@ const getBoes = async (_: NextApiRequest, res: NextApiResponse<Data>) => {
     res.status(500).json({ message: "Something went wrong in the Database" });
   } finally {
     await db.disconnect();
+  }
+};
+
+const postBoe = async (
+  data: Record<string, unknown>,
+  res: NextApiResponse<Data>
+) => {
+  const { boeId, date, summary } = data;
+  console.log("Creating: ", boeId, date, summary);
+  const newBoe = new Boe({
+    boeId,
+    date,
+    summary,
+  });
+  try {
+    await db.connect();
+    await newBoe.save();
+    await db.disconnect();
+
+    res.status(200).json(newBoe);
+  } catch (error) {
+    await db.disconnect();
+    console.log("Error when POST boe");
+    return res
+      .status(500)
+      .json({ message: "Something went wrong in the Database" });
   }
 };

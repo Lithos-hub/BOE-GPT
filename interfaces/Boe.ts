@@ -1,4 +1,5 @@
 export interface IBoe {
+  boeId: string;
   date: string;
   summary: string;
 }
@@ -17,12 +18,16 @@ export interface SectionData {
   section: string;
   boe: string;
   href: string;
-  date: string;
   subtitle: string | null;
 }
 
+export interface BoeDictionaryData extends Omit<BoeDictionary, "date"> {}
+
 export interface BoeDictionary {
-  [index: string]: {
-    [index: string]: SectionData[];
+  dictionaryData: {
+    [x: string]: {
+      [index: string]: SectionData[];
+    };
   };
+  date: string;
 }

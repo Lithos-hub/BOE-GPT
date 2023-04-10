@@ -1,10 +1,10 @@
-import { Locator, Page, chromium, firefox } from "playwright";
-import fs from "fs";
-import path from "path";
-import { parseDate } from "@/utils";
+import { chromium } from "playwright";
+
 import { BoeDictionary, SectionData } from "@/interfaces";
 
 export const getBOEByDate = async (date: string) => {
+  const dictionary: BoeDictionary | {} = {};
+
   const BASE_URL = "https://boe.es/diario_boe";
 
   const browser = await chromium.launch();
@@ -14,28 +14,28 @@ export const getBOEByDate = async (date: string) => {
   const dateInput = await page.$("#fechaBOE");
 
   await dateInput!.click();
-  // await dateInput!.fill(date);
-  await dateInput!.fill("2023-04-04");
+  await dateInput!.fill(date);
 
   await page.waitForTimeout(1000);
 
   const button = await page.$("input.boton");
-
   await button!.click();
 
   await page.waitForLoadState();
 
-  const dropdown = await page.getByText("Secciones");
-
+  const dropdown = await page.locator("label").getByText("Secciones");
   await dropdown.click();
+
+  const optionIsVisible = await page.isVisible(
+    "text='I. Disposiciones generales'"
+  );
+
+  if (!optionIsVisible) return null;
 
   const option = await page.locator("a", {
     hasText: "I. Disposiciones generales",
   });
-
   await option.click();
-
-  const dictionary: BoeDictionary = {};
 
   const H5Tags = await page.$$("h5");
 
@@ -60,7 +60,6 @@ export const getBOEByDate = async (date: string) => {
       )}`;
 
       return {
-        date,
         section: sectionName,
         boe: pdfName,
         subtitle: await h5.textContent(),
@@ -70,22 +69,34 @@ export const getBOEByDate = async (date: string) => {
   );
 
   for (const item of await boeData) {
-    await page.goto(await item.href);
-    const sectionText = await page.$("#textoxslt");
-
-    const obj = {
-      ...item,
-      htmlText: await sectionText?.innerText(),
-    };
-
-    if (!dictionary[obj.section]) {
-      dictionary[obj.section] = [];
+    if (!dictionary[item.section]) {
+      dictionary[item.section] = [];
     }
-    dictionary[obj.section].push(obj);
+    dictionary[item.section].push(item);
   }
 
-  await browser.close();
-  return dictionary;
+  const dataToReturn = {
+    dictionaryData: {
+      ...dictionary,
+    },
+    date,
+  };
 
-  // return await getAllAticlesInformation(page, BASE_URL, articlePagesList, date);
+  await browser.close();
+  return dataToReturn;
+};
+
+export const getTextToSummarize = async (boeId: string) => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  await page.goto(`https://boe.es/diario_boe/txt.php?id=${boeId}`);
+
+  const text = await page.locator("#textoxslt");
+
+  const htmlText = await text.innerText();
+
+  await browser.close();
+
+  return htmlText;
 };

@@ -14,8 +14,13 @@ export const parseDate = (dateInMillis: number): string => {
   return `${year}-${month}-${day}`;
 };
 
-export const getAllDatesFrom1960 = (): string[] => {
-  const startDate = new Date("1960-09-01");
+export const reformatDate = (date: string): string => {
+  const [day, month, year] = date.split("-");
+  return `${year}-${month}-${day}`;
+};
+
+export const getAllDatesFrom2000 = (): string[] => {
+  const startDate = new Date("2000-09-01");
   const endDate = new Date();
 
   const daysArray = [];

@@ -20,7 +20,7 @@ const Navbar = () => {
       <AppBar
         position="fixed"
         elevation={10}
-        className="w-[77vw] mx-auto left-0 top-5 rounded-xl bg-primary-1 bg-opacity-10 backdrop-blur text-white"
+        className="w-[95vw] lg:w-[75vw] mx-auto left-0 top-5 rounded-xl bg-primary-1 bg-opacity-10 backdrop-blur text-white"
       >
         <Toolbar className="flex flex-wrap md:flex-row gap-5 justify-center md:justify-between p-2 px-5">
           <Link href="/">
@@ -46,13 +46,15 @@ const Navbar = () => {
               value={dateValue}
               onChange={(newdateValue) => setDateValue(newdateValue)}
               format="DD-MM-YYYY"
+              minDate={dayjs(946681200000)} // => 2000-01-01
+              maxDate={dayjs(new Date().getTime())}
             />
             <IconButton
               color="primary"
               aria-label="icono de búsqqueda"
               size="large"
               onClick={() => {
-                router.push(`/boe/${dayjs(dateValue).format("DD-MM-YYYY")}`);
+                router.push(`/boe/${dayjs(dateValue).format("YYYY-MM-DD")}`);
               }}
             >
               <SearchOutlined />
