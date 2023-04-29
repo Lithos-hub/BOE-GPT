@@ -21,13 +21,13 @@ export interface SectionData {
   subtitle: string | null;
 }
 
-export interface BoeDictionaryData extends Omit<BoeDictionary, "date"> {}
+export interface BoeDictionaryData {
+  [x: string]: SectionData[];
+}
 
 export interface BoeDictionary {
   dictionaryData: {
-    [x: string]: {
-      [index: string]: SectionData[];
-    };
+    [x: string]: SectionData[];
   };
   date: string;
 }

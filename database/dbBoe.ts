@@ -12,20 +12,28 @@ export const getBoeByDate = async (date: string): Promise<IBoe | null> => {
 
 export const getBoeById = async (boeId: string): Promise<IBoe | null> => {
   await db.connect();
-  const boeData = await Boe.findOne({ boe: boeId }).lean();
+  const boeData = await Boe.findOne({ boeId }).lean();
   await db.disconnect();
 
-  if (!boeData) {
-    return null;
-  }
-
-  return JSON.parse(JSON.stringify(boeData));
+  return boeData ? JSON.parse(JSON.stringify(boeData)) : null;
 };
 
-export const getAllBoeIds = async (): Promise<IBoe[]> => {
+export const getAllBoeIds = async (): Promise<string[]> => {
   await db.connect();
-  const boeIds = await Boe.find().select("boe -_id").lean();
+  const boeIds = await Boe.find().select("boeId -_id").lean();
   await db.disconnect();
 
-  return boeIds;
+  const simplifiedIds = boeIds.map(({ boeId }) => boeId);
+
+  return JSON.parse(JSON.stringify(simplifiedIds));
+};
+
+export const getAllBoeDates = async (): Promise<string[]> => {
+  await db.connect();
+  const boeDates = await Boe.find().select("date -_id").lean();
+  await db.disconnect();
+
+  const simplifiedDates = boeDates.map(({ date }) => date);
+
+  return JSON.parse(JSON.stringify(simplifiedDates));
 };

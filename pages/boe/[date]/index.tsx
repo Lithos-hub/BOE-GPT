@@ -1,37 +1,27 @@
 import { useMemo } from "react";
 import { GetStaticProps, NextPage } from "next";
-import Link from "next/link";
 
-import { getAllDatesFrom2000 } from "@/utils";
+import { getAllDatesFrom2000, reformatDate } from "@/utils";
 
 import MainLayout from "@/components/Layout/MainLayout";
 
 import { getBOEByDate } from "@/playwright";
 
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
-} from "@mui/material";
-
-import { ExpandMore } from "@mui/icons-material";
-import { BoeDictionary, IBoe } from "@/interfaces";
+import { BoeDictionary, BoeDictionaryData } from "@/interfaces";
 import { GetStaticPaths } from "next";
-import { dbBoe } from "@/database";
+import { BoeSections } from "@/components";
+import { getAllBoeDates } from "@/database/dbBoe";
 
 interface Props {
   date: string;
-  responseGPT: string | null;
-  dictionaryData?: BoeDictionary;
+  dictionaryData: BoeDictionaryData | null;
 }
 
-const HomePage: NextPage<Props> = ({ responseGPT, date, dictionaryData }) => {
-  const titles = useMemo(
+const BoeByDatePage: NextPage<Props> = ({ date, dictionaryData }) => {
+  const sections = useMemo(
     () => (dictionaryData ? Object.keys(dictionaryData) : []),
     [dictionaryData]
   );
-
   return (
     <main>
       <MainLayout
@@ -41,46 +31,14 @@ const HomePage: NextPage<Props> = ({ responseGPT, date, dictionaryData }) => {
       >
         <>
           {dictionaryData ? (
-            <section className="flex flex-col gap-5">
-              {titles.map((title, i) => (
-                <Accordion key={i} className={`section-${i} border`}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    {title}
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="flex flex-col gap-5">
-                      {dictionaryData[title].map(({ boe, subtitle }, i) => (
-                        <div
-                          key={i}
-                          className="flex justify-between gap-5 items-center"
-                        >
-                          <div>
-                            <strong> {subtitle} </strong>
-                            <h5>{boe}</h5>
-                          </div>
-                          <div className="flex gap-2">
-                            <Link href={`/boe/${date}/${boe}`}>
-                              <Button variant="outlined">Resumen</Button>
-                            </Link>
-                            <a
-                              href={`https://boe.es/diario_boe/txt.php?id=${boe}`}
-                              target="_blank"
-                            >
-                              <Button variant="outlined" color="warning">
-                                BOE original
-                              </Button>
-                            </a>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </section>
+            <BoeSections
+              sections={sections}
+              dictionaryData={dictionaryData}
+              date={date}
+            />
           ) : (
             <h1 className="text-red-500 font-bold text-lg mx-auto">
-              No se ha publicado un BOE en la fecha de hoy
+              No hay un BOE publicado a fecha de {date}
             </h1>
           )}
         </>
@@ -89,10 +47,10 @@ const HomePage: NextPage<Props> = ({ responseGPT, date, dictionaryData }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = (ctx) => {
-  const datesArray = getAllDatesFrom2000();
+export const getStaticPaths: GetStaticPaths = async (ctx) => {
+  const dates = await getAllBoeDates();
 
-  const paths = datesArray.map((date) => ({
+  const paths = dates.map((date) => ({
     params: {
       date,
     },
@@ -100,32 +58,23 @@ export const getStaticPaths: GetStaticPaths = (ctx) => {
 
   return {
     paths,
-    fallback: false,
+    fallback: true,
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  let data: string | null = null;
-  let dictionary = null;
   const { date } = params as { date: string };
-  const boe: IBoe | null = await dbBoe.getBoeByDate(date);
 
-  if (!boe) {
-    try {
-      dictionary = (await getBOEByDate(date)) as BoeDictionary;
-    } catch (error) {
-      console.log("ERROR", error);
-    }
-  } else {
-    data = boe.summary;
-  }
+  const dictionary: BoeDictionary | null = await getBOEByDate(date);
+
+  console.log(dictionary);
+
   return {
     props: {
-      date,
-      responseGPT: data,
+      date: reformatDate(date),
       dictionaryData: dictionary ? dictionary.dictionaryData : null,
     },
   };
 };
 
-export default HomePage;
+export default BoeByDatePage;

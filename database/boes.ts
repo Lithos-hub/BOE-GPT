@@ -1,15 +1,13 @@
-interface SeedBoe {
-  date: string;
-  summary: string;
-}
+import { IBoe } from "@/interfaces";
 
 interface SeedData {
-  boes: SeedBoe[];
+  boes: IBoe[];
 }
 
 export const initialData: SeedData = {
   boes: [
     {
+      boeId: "BOE-A-2022-17104",
       date: "2022-10-20",
       summary: `
             "<p>Este texto habla sobre las medidas de control sanitario en las fronteras de España debido a la pandemia por COVID-19.</p>\n" +

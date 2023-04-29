@@ -1,9 +1,9 @@
 import { chromium } from "playwright";
 
-import { BoeDictionary, SectionData } from "@/interfaces";
+import { BoeDictionaryData } from "@/interfaces";
 
 export const getBOEByDate = async (date: string) => {
-  const dictionary: BoeDictionary | {} = {};
+  const dictionary: BoeDictionaryData = {};
 
   const BASE_URL = "https://boe.es/diario_boe";
 
@@ -23,7 +23,12 @@ export const getBOEByDate = async (date: string) => {
 
   await page.waitForLoadState();
 
+  const dropdownIsVisible = await page.isVisible("text='Secciones'");
+
+  if (!dropdownIsVisible) return null;
+
   const dropdown = await page.locator("label").getByText("Secciones");
+
   await dropdown.click();
 
   const optionIsVisible = await page.isVisible(

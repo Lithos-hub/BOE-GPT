@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BoeApi = axios.create({
+const boeApi = axios.create({
   baseURL: "/api",
 });
 
-export default BoeApi;
+export default boeApi;

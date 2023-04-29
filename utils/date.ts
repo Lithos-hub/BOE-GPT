@@ -20,7 +20,7 @@ export const reformatDate = (date: string): string => {
 };
 
 export const getAllDatesFrom2000 = (): string[] => {
-  const startDate = new Date("2000-09-01");
+  const startDate = new Date("2023-04-03");
   const endDate = new Date();
 
   const daysArray = [];

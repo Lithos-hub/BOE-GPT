@@ -1,5 +1,5 @@
 services:
-  teslodb:
+  boegpt:
     image: mongo:5.0.0
     container_name: boegpt-database
     ports:

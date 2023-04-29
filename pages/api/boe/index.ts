@@ -8,6 +8,7 @@ type Data =
   | {
       message: string;
     }
+  | IBoe
   | IBoe[];
 
 export default function handler(

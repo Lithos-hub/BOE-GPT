@@ -33,9 +33,6 @@ export default function handler(
 
 const getBoe = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
   const { date = null } = req.query;
-
-  console.log(`Getting ${date} data`);
-
   const currentDate = parseDate(new Date().getTime());
 
   try {

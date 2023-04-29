@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 
 import MainLayout from "@/components/Layout/MainLayout";
@@ -9,47 +9,59 @@ import { getTextToSummarize } from "@/playwright";
 import { runCompletion } from "@/openai";
 import { Boe } from "@/models";
 import { BoeAPI } from "@/services";
+import { getAllBoeDates, getAllBoeIds } from "@/database/dbBoe";
+import { reformatDate } from "@/utils";
 
 interface Props {
-  date: string;
   boeData: any;
 }
 
-const BoeByIdPage: NextPage<Props> = ({ boeData, date }) => {
-  console.log("boeData => ", boeData);
+const BoeByIdPage: NextPage<Props> = ({ boeData }) => {
+  console.log("Boe data => ", boeData);
+
+  const formattedDate = useMemo(
+    () => reformatDate(boeData.date),
+    [boeData.date]
+  );
   return (
     <MainLayout
-      sectionTitle={`BOE a fecha de ${date}`}
-      title={`BOE·GPT | ${date}`}
-      description={`Resumen del BOE publicado en la fecha de ${date}.`}
+      sectionTitle={`BOE a fecha de ${formattedDate}`}
+      title={`BOE·GPT | ${formattedDate}`}
+      description={`Resumen del BOE publicado en la fecha de ${formattedDate}.`}
     >
-      <SummaryHTML html={boeData} />
+      {boeData && <SummaryHTML html={boeData.summary} />}
     </MainLayout>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  // const boeIds = (await dbBoe.getAllBoeIds()) || [
-  //   { boeId: "BOE-A-2023-8454", date: "2023-04-04" },
-  // ];
-  const boeIds = [{ boeId: "BOE-A-2023-8454", date: "2023-04-04" }];
+  const dates = await getAllBoeDates();
+  const boeIds = await getAllBoeIds();
+
+  const paths = dates
+    .map((date) => {
+      return boeIds.map((id) => {
+        return { params: { date, id } };
+      });
+    })
+    .flat();
 
   return {
-    paths: boeIds.map(({ boeId, date }) => ({
-      params: {
-        date,
-        id: boeId,
-      },
-    })),
+    paths,
     fallback: true,
   };
 };
-
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id = "", date = "" } = params as { id: string; date: string };
 
   // 1. Find the summary in MongoDB
   const boeData = await dbBoe.getBoeById(id);
+
+  console.log(
+    boeData
+      ? "************* BOE FOUND. Showing... *************"
+      : "************* BOE NOT FOUND. Generating... *************"
+  );
 
   // 2. If exists, simply return it
   if (boeData) {
@@ -57,7 +69,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       props: {
         boeData,
       },
-      revalidate: 86400,
+      revalidate: 60 * 60, // Each hour
     };
   }
 
@@ -67,18 +79,35 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // 4. Call ChatGPT
   const gptResult = await runCompletion({ prompt_text: textToSummarize });
 
-  // 5. Save summary in MongoDB
-  await BoeAPI.post("/boe", {
+  const generatedData = {
     date,
     boeId: id,
     summary: gptResult,
-  });
+  };
+
+  console.log("GENERATED RESULT: ", generatedData);
+
+  // 5. Save summary in MongoDB
+  try {
+    await BoeAPI.post("/boe", generatedData);
+  } catch (error) {
+    console.log(error);
+    return {
+      props: {
+        boeData: {
+          ...generatedData,
+          summary:
+            '<small className="text-red-500">Algo salió mal en la generación automática</small>',
+        },
+      },
+    };
+  }
 
   return {
     props: {
-      boeData: gptResult,
+      boeData: generatedData,
     },
-    revalidate: 86400,
+    revalidate: 60 * 60, // Each hour,
   };
 };
 
