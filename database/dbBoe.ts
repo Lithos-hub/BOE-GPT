@@ -21,6 +21,7 @@ export const getBoeById = async (boeId: string): Promise<IBoe | null> => {
 export const getAllBoeIds = async (): Promise<string[]> => {
   await db.connect();
   const boeIds = await Boe.find().select("boeId -_id").lean();
+  console.log("All boe Ids: ", boeIds);
   await db.disconnect();
 
   const simplifiedIds = boeIds.map(({ boeId }) => boeId);
@@ -31,6 +32,7 @@ export const getAllBoeIds = async (): Promise<string[]> => {
 export const getAllBoeDates = async (): Promise<string[]> => {
   await db.connect();
   const boeDates = await Boe.find().select("date -_id").lean();
+  console.log("All boe dates", boeDates);
   await db.disconnect();
 
   const simplifiedDates = boeDates.map(({ date }) => date);

@@ -9,7 +9,7 @@ import { getBOEByDate } from "@/playwright";
 
 import { BoeDictionary, BoeDictionaryData } from "@/interfaces";
 import { GetStaticPaths } from "next";
-import { BoeSections } from "@/components";
+import { BoeSections, Loading } from "@/components";
 import { getAllBoeDates } from "@/database/dbBoe";
 
 interface Props {
@@ -29,19 +29,23 @@ const BoeByDatePage: NextPage<Props> = ({ date, dictionaryData }) => {
         sectionTitle={`El BOE a fecha de ${date}`}
         description="Aplicación ver un resumen diario del Boletín Oficial del Estado (BOE) mediante uso de inteligencia artificial"
       >
-        <>
-          {dictionaryData ? (
-            <BoeSections
-              sections={sections}
-              dictionaryData={dictionaryData}
-              date={date}
-            />
-          ) : (
-            <h1 className="text-red-500 font-bold text-lg mx-auto">
-              No hay un BOE publicado a fecha de {date}
-            </h1>
-          )}
-        </>
+        {!dictionaryData ? (
+          <Loading />
+        ) : (
+          <>
+            {dictionaryData ? (
+              <BoeSections
+                sections={sections}
+                dictionaryData={dictionaryData}
+                date={date}
+              />
+            ) : (
+              <h1 className="text-red-500 font-bold text-lg mx-auto">
+                No hay un BOE publicado a fecha de {date}
+              </h1>
+            )}
+          </>
+        )}
       </MainLayout>
     </main>
   );

@@ -15,6 +15,7 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  console.log("HANDLER: /api/boe");
   switch (req.method) {
     case "GET":
       return getBoes(req, res);
